@@ -1,6 +1,6 @@
 {
     "name": "typeorm-encrypt-jsoncolumn",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "A typeorm extension for encrypt and decrypt json string column.",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",

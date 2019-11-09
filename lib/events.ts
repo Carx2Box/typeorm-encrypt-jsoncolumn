@@ -77,26 +77,23 @@ const encryptObject = (data, options: EncryptedJsonColumnOptions) => {
   }
 
   if (objectUtil.isString(data)) {
-      return encryptString(data, options.encrypt);
-  }
-
-  if (objectUtil.isArray(data)) {
-    return data.map(clear => encryptObject(clear, options));
-  }
-
-  try {
-    JSON.stringify(data);
-  } catch (_) {
-    return data;
+    return encryptString(data, options.encrypt);
   }
 
   const dataResult = {...data};
   for (const key of Object.keys(dataResult)) {
     const isPropertyToEncryt = options.matching.some(x => x.test(key));
     const value = data[key];
-    if (objectUtil.isString(value) && isPropertyToEncryt) {
-      dataResult[key] = encryptObject(dataResult[key], options);
-    } else if (!objectUtil.isString(value)) {
+
+    if (objectUtil.isString(value)) {
+      if (isPropertyToEncryt) {
+        dataResult[key] = encryptObject(dataResult[key], options);
+      }
+    } else if (objectUtil.isArray(data)) {
+      if (isPropertyToEncryt) {
+        return data.map(clear => encryptObject(clear, options));
+      }
+    } else {
       dataResult[key] = encryptObject(dataResult[key], options);
     }
   }
@@ -173,23 +170,20 @@ const decryptObject = (data: any, options: EncryptedJsonColumnOptions) => {
     return decryptString(data, options.encrypt);
   }
 
-  if (objectUtil.isArray(data)) {
-    return data.map(clear => decryptObject(clear, options));
-  }
-
-  try {
-    JSON.stringify(data);
-  } catch (_) {
-    return data;
-  }
-
   const dataResult = {...data};
   for (const key of Object.keys(dataResult)) {
-    const isPropertyToEncryt = options.matching.some(x => x.test(key));
+    const isPropertyToDecrypt = options.matching.some(x => x.test(key));
     const value = data[key];
-    if (objectUtil.isString(value) && isPropertyToEncryt) {
-      dataResult[key] = decryptObject(dataResult[key], options);
-    } else if (!objectUtil.isString(value)) {
+
+    if (objectUtil.isString(value)) {
+      if (isPropertyToDecrypt) {
+        dataResult[key] = decryptObject(dataResult[key], options);
+      }
+    } else if (objectUtil.isArray(data)) {
+      if (isPropertyToDecrypt) {
+        return data.map(clear => decryptObject(clear, options));
+      }
+    } else {
       dataResult[key] = decryptObject(dataResult[key], options);
     }
   }

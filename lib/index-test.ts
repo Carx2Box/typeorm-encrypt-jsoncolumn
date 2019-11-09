@@ -1,19 +1,8 @@
-# typeorm-encrypt-jsoncolumn
-
-A typeorm extension for encrypt and decrypt json string column
-
-## Install
-
-npm i typeorm-encrypt-jsoncolumn --save
-
-## Example
-
-``` ts
 import { Entity, PrimaryGeneratedColumn, createConnection } from 'typeorm';
-import { EncryptedJsonColumn } from 'typeorm-encrypt-jsoncolumn';
-import { SubscriberJsonEncrypt } from 'typeorm-encrypt-jsoncolumn';
+import { EncryptedJsonColumn } from './interfaces';
+import { SubscriberJsonEncrypt } from './subscriber';
 
-const machingRegex = [/secret/];
+const regex = [/secret/];
 
 @Entity()
 class Test {
@@ -28,12 +17,12 @@ class Test {
       algorithm: 'aes-256-cbc',
       ivLength: 16,
     },
-    matching: machingRegex,
+    matching: regex,
   })
   secret: string;
 }
 
-async function executeComponent() {
+async function TestComponent() {
   const connection = await createConnection({
     type: 'sqljs',
     entities: [Test],
@@ -42,16 +31,20 @@ async function executeComponent() {
   });
 
   const entity = new Test();
-  entity.secret = '{"secret": "testing"}';
+  entity.secret = '{"secret": "testing", "node": { "secret": "testing2" }}';
 
   const repository = connection.getRepository(Test);
   await repository.save(entity);
 
+  console.log('Entity save' , entity);
+
   const result = await repository.find({ select: ['id', 'secret'] });
+
+  console.log('Entity get', result);
 
   if (entity.secret !== '{secret: "testing"}') {
     throw new Error('Error codde');
   }
 }
 
-executeComponent();
+TestComponent();
